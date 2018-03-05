@@ -12,7 +12,7 @@ public class Map : MonoBehaviour {
     // Use this for initialization
     void Start() {
         Init();
-        foreach(Tiles element in TileMap[1, 1].ControllTiles(Tiles.Ways.Right, 5))
+        foreach (Tiles element in TileMap[1, 1].ControllArroundTiles(2, true))
         {
             element.GetComponent<SpriteRenderer>().color = Color.black;
         }
@@ -50,10 +50,10 @@ public class Map : MonoBehaviour {
                 }
                 else
                 {
-                TileMap[i, k].ArroundTiles[0] = TileMap[i, (k > 0) ? k - 1 : k];
-                TileMap[i, k].ArroundTiles[2] = TileMap[i, (k + 1 < height) ? k + 1 : k];
-                TileMap[i, k].ArroundTiles[3] = TileMap[(i > 0) ? i - 1 : i, (k + 1 < height) ? k + 1 : k];
-                TileMap[i, k].ArroundTiles[5] = TileMap[(i > 0) ? i - 1 : i, (k > 0) ? k - 1 : k];
+                    TileMap[i, k].ArroundTiles[0] = TileMap[i, (k > 0) ? k - 1 : k];
+                    TileMap[i, k].ArroundTiles[2] = TileMap[i, (k + 1 < height) ? k + 1 : k];
+                    TileMap[i, k].ArroundTiles[3] = TileMap[(i > 0) ? i - 1 : i, (k + 1 < height) ? k + 1 : k];
+                    TileMap[i, k].ArroundTiles[5] = TileMap[(i > 0) ? i - 1 : i, (k > 0) ? k - 1 : k];
                 }
                 TileMap[i, k].ArroundTiles[1] = TileMap[(i + 1 < width) ? i + 1 : i, k];
                 TileMap[i, k].ArroundTiles[4] = TileMap[(i > 0) ? i - 1 : i, k];

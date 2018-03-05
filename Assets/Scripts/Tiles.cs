@@ -8,8 +8,29 @@ public class Tiles : MonoBehaviour {
     public int pos_x;
     public int pos_y;
     public Tiles[] ArroundTiles = new Tiles[6];
+#region operators
+    public static Tiles[] operator +(Tiles _tiles, Tiles[] _tile)
+    {
+        if (_tile == null)
+        {
+            Tiles[] tmp = new Tiles[1];
+            tmp[0] = _tiles;
+            return tmp;
+        }
+        if (_tiles == null)
+        {
+            return _tile;
+        }
 
-    public static Tiles[] operator+(Tiles[] _tiles,Tiles _tile)
+        Tiles[] result = new Tiles[_tile.Length + 1];
+        result[0] = _tiles;
+
+        for (int i = 1; i < result.Length; i++)
+            result[i] = _tile[i - 1];
+
+        return result;
+    }
+    public static Tiles[] operator +(Tiles[] _tiles, Tiles _tile)
     {
         if (_tiles == null)
         {
@@ -41,20 +62,62 @@ public class Tiles : MonoBehaviour {
         result[1] = tile1;
         return result;
     }
-    // Use this for initialization
-    void Start () {
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
-    public Tiles[] ControllTiles(Ways way,int size,bool Bi_direction = false)
+    
+    #endregion
+  
+#region ControllFunctions
+    public Tiles[] ControllStraightTiles(Ways way,int size,bool Bi_direction = false)
     {
+        if (Bi_direction == true)
+        {
+            Tiles[] BI_result = new Tiles[size*2];
+            BI_result = SumTiles( SearchTiles(null, way, size),SearchTiles(null,((int)way > 2) ? way-3:way + 3,size));
+            return BI_result;
+        }
+
         Tiles[] result = new Tiles[size];
+
         result = SearchTiles(null, way, size);
         return result;
+    }
+    public Tiles[] ControllArroundTiles(int size, bool includeSelf = true)
+    {
+       
+        Tiles[] result = new Tiles[size *6 + (includeSelf ? 1 : 0)];
+        if (includeSelf)
+        {
+            result = SumTiles(SumTiles(ControllStraightTiles(Ways.RightUp, size, true),
+                        ControllStraightTiles(Ways.Right, size, true)),
+                           ControllStraightTiles(Ways.RightDown, size, true)) + this;
+        }
+        else
+            result = SumTiles(SumTiles(ControllStraightTiles(Ways.RightUp, size, true),
+                      ControllStraightTiles(Ways.Right, size, true)),
+                         ControllStraightTiles(Ways.RightDown, size, true));
+        return result;
+    }
+    public Tiles[] SumTiles(Tiles[] tiles1, Tiles[] tiles2)
+    {
+        int startpoint = 0;
+        int startpoint2 = 0;
+        int index = 0;
+ 
+
+        Tiles[] result = new Tiles[tiles1.Length + tiles2.Length];
+        int j = 0;
+        while (startpoint != tiles1.Length)
+        {
+            result[index] = tiles1[j];
+            index++; j++; startpoint++;
+        }
+        j = 0;
+        while (startpoint2 != tiles2.Length)
+        {
+            result[index] = tiles2[j];
+            index++; j++; startpoint2++;
+        }
+        return result;
+        
     }
     Tiles[] SearchTiles(Tiles[] Searched,Ways way,int size)
     {
@@ -69,4 +132,5 @@ public class Tiles : MonoBehaviour {
         return ArroundTiles[(int)way].SearchTiles(Searched,way,size-1) + this;
 
     }
+    #endregion
 }
