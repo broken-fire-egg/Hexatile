@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class Tiles : MonoBehaviour {
     public enum Ways { RightUp,Right,RightDown,LeftDown,Left,LeftUp }
+    public bool selected;
     public int value;
     public int pos_x;
     public int pos_y;
     public Tiles[] ArroundTiles = new Tiles[6];
-#region operators
+    SpriteRenderer spriteRenderer;
+#region Operators
     public static Tiles[] operator +(Tiles _tiles, Tiles[] _tile)
     {
         if (_tile == null)
@@ -62,10 +64,14 @@ public class Tiles : MonoBehaviour {
         result[1] = tile1;
         return result;
     }
-    
+
     #endregion
-  
-#region ControllFunctions
+
+    private void Start()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+    #region ControllFunctions
     public Tiles[] ControllStraightTiles(Ways way,int size,bool Bi_direction = false)
     {
         if (Bi_direction == true)
@@ -130,6 +136,18 @@ public class Tiles : MonoBehaviour {
             return ArroundTiles[(int)way].SearchTiles(Searched, way, 0) + this;
 
         return ArroundTiles[(int)way].SearchTiles(Searched,way,size-1) + this;
+
+    }
+    #endregion
+
+#region Status
+    public void ToggleSelect()
+    {
+        selected = !selected;
+        if (selected)
+            spriteRenderer.color = new Color(0, 0, 0);
+        else
+            spriteRenderer.color = new Color(1, 1, 1);
 
     }
     #endregion

@@ -2,25 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Map : MonoBehaviour {
+public class Map : MonoBehaviour
+{
+    public static Map instance;
+
     public Sprite TileSprite;
     public int width;
     public int height;
     public GameObject TileObject;
     public Tiles[,] TileMap;
-    
+    public string selectmode;
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+    }
     // Use this for initialization
-    void Start() {
+    void Start()
+    {
         Init();
-        foreach (Tiles element in TileMap[1, 1].ControllArroundTiles(2, true))
-        {
-            element.GetComponent<SpriteRenderer>().color = Color.black;
-        }
     }
 
     // Update is called once per frame
-    void Update() {
-
+    void Update()
+    {
+        CheckTouch();
     }
 
     private void Init()
@@ -38,9 +44,9 @@ public class Map : MonoBehaviour {
         }
         for (int i = 0; i < width; i++)
         {
-            for(int k=0; k < height; k++)
+            for (int k = 0; k < height; k++)
             {
-                if(k % 2 == 0)
+                if (k % 2 == 0)
                 {
 
                     TileMap[i, k].ArroundTiles[0] = TileMap[(i + 1 < width) ? i + 1 : i, (k > 0) ? k - 1 : k];
@@ -90,5 +96,28 @@ public class Map : MonoBehaviour {
             }
         }
     }
+    private void CheckTouch()
+    {
+        //Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
 
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
+
+            if (hit.collider != null)
+            {
+                if (hit.collider.CompareTag("Tile"))
+                {
+                    Tiles t = hit.collider.GetComponent<Tiles>();
+                    foreach (Tiles t_ in t.ArroundTiles + t)
+                    {
+                        t_.ToggleSelect();
+                    }
+                }
+            }
+        }
+    }
 }
