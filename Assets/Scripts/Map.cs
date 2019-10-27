@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +13,14 @@ public class Map : MonoBehaviour
     public GameObject TileObject;
     public Tiles[,] TileMap;
     public string selectmode;
+
+    public Unit SelectedUnit;
+    public GameObject Selected_Pointer;
+
+    public GameObject TestHero;
+    public GameObject TestEnemy;
+
+    public Transform UnitParent;
     private void Awake()
     {
         if (instance == null)
@@ -21,12 +30,37 @@ public class Map : MonoBehaviour
     void Start()
     {
         Init();
+
+        TestSpawn(TestHero);
+
+        //TestSpawn(TestHero);
+        //TestSpawn(TestHero);
+        //Debug.Log(Tiles.GetDistancePoint(TileMap[0, 0], TileMap[9, 9]));
     }
 
+    public void TestSpawn(GameObject obj)
+    {
+        GameObject go = Instantiate(obj, UnitParent);
+        Tiles spawntile = TileMap[UnityEngine.Random.Range(0, width), UnityEngine.Random.Range(0, height)];
+        while (spawntile.somethingOn)
+            spawntile = TileMap[UnityEngine.Random.Range(0, width), UnityEngine.Random.Range(0, height)];
+        go.transform.localPosition = spawntile.transform.position;
+        go.GetComponent<Unit>().groundtile = spawntile;
+        spawntile.somethingOn = true;
+        spawntile.unit = go.GetComponent<Unit>();
+    }
     // Update is called once per frame
     void Update()
     {
         CheckTouch();
+        PointerMove();
+    }
+
+    private void PointerMove()
+    {
+        if (SelectedUnit != null)
+            if (Selected_Pointer.activeInHierarchy)
+                Selected_Pointer.transform.localPosition = SelectedUnit.transform.localPosition;
     }
 
     private void Init()
@@ -105,19 +139,77 @@ public class Map : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
+            RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
 
+            if (hit.collider != null)
+            {
+                switch (hit.collider.tag)
+                {
+                    case "Tile":
+                        Tiles t = hit.collider.GetComponent<Tiles>();
+                        if (t.somethingOn)
+                            if (t.unit.CompareTag("Hero"))
+                                if (t.unit != SelectedUnit)
+                                    SelectHero(t.unit);
+                        break;
+                    //case "Hero":
+                    //    Unit sel = hit.transform.GetComponent<Unit>();
+                    //    if (sel != SelectedUnit)
+                    //        SelectHero(sel);
+                    //    break;
+                    default:
+                        break;
+                }
+                //if (hit.collider.CompareTag("Tile"))
+                //{
+
+
+                //    //foreach (Tiles t_ in t.ArroundTiles + t)
+                //    //{
+                //    //    t_.ToggleSelect();
+                //    //}
+                //}
+
+            }
+        }
+        else if (Input.GetMouseButtonDown(1))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
             if (hit.collider != null)
             {
                 if (hit.collider.CompareTag("Tile"))
                 {
                     Tiles t = hit.collider.GetComponent<Tiles>();
-                    foreach (Tiles t_ in t.ArroundTiles + t)
-                    {
-                        t_.ToggleSelect();
-                    }
+                    Debug.Log("move");
+                    if (SelectedUnit != null)
+                        SelectedUnit.FindPath(t);
                 }
             }
         }
+    }
+    public void SelectHero(Unit unit)
+    {
+        GameObject Hero = unit.gameObject;
+        SelectedUnit = unit;
+        Vector3 unitpos = unit.transform.position;
+        Selected_Pointer.SetActive(true);
+        Selected_Pointer.transform.localPosition = unitpos;
+    }
+    public void Action(Tiles tile)
+    {
+        switch (selectmode)
+        {
+            case "move":
+                break;
+            default:
+                break;
+        }
+    }
+    public void MapFlush()
+    {
+        for (int i = 0; i < width; i++)
+            for (int k = 0; k < height; k++)
+                TileMap[i, k].Flush();
     }
 }
